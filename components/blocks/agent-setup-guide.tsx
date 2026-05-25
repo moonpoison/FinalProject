@@ -235,11 +235,14 @@ export function AgentSetupGuide({ compact = false }: AgentSetupGuideProps) {
 
       {/* macOS 보안 안내 */}
       {platform === "mac" && downloads[platform] && (
-        <p className="text-[10px] text-muted-foreground/70 leading-relaxed">
-          macOS에서 &quot;확인되지 않은 개발자&quot; 경고가 나오면 터미널에서{" "}
-          <code className="bg-muted px-1 rounded">xattr -d com.apple.quarantine ./AutoFlowAgent*</code>{" "}
-          실행 후 다시 시도하세요.
-        </p>
+        <div className="text-[10px] text-muted-foreground/70 leading-relaxed space-y-1">
+          <p>macOS에서 &quot;확인되지 않은 개발자&quot; 경고가 나오면 터미널에서 아래 명령어를 실행하세요:</p>
+          <code className="block bg-muted px-2 py-1.5 rounded text-[10px] whitespace-pre">
+{`xattr -d com.apple.quarantine ./AutoFlowAgent-mac
+chmod +x ./AutoFlowAgent-mac
+./AutoFlowAgent-mac`}
+          </code>
+        </div>
       )}
     </div>
   )
