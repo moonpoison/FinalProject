@@ -15,6 +15,10 @@ import subprocess
 import shutil
 import platform
 
+# Windows 콘솔 UTF-8 설정
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 AGENT_SCRIPT = os.path.join(os.path.dirname(__file__), "autoflow_app.py")
 DIST_DIR = os.path.join(os.path.dirname(__file__), "dist")
 BUILD_DIR = os.path.join(os.path.dirname(__file__), "build")
@@ -54,13 +58,13 @@ def build():
     output_name = f"AutoFlowAgent-v{VERSION}-{plat}{ext}"
 
     print(f"""
-╔═══════════════════════════════════════════════════════╗
-║           AutoFlow 에이전트 빌드                        ║
-╠═══════════════════════════════════════════════════════╣
-║  플랫폼  : {plat:<43} ║
-║  버전    : {VERSION:<43} ║
-║  출력    : dist/{output_name:<37} ║
-╚═══════════════════════════════════════════════════════╝
++-------------------------------------------------------+
+|           AutoFlow Agent Build                        |
++-------------------------------------------------------+
+|  Platform : {plat:<42} |
+|  Version  : {VERSION:<42} |
+|  Output   : dist/{output_name:<36} |
++-------------------------------------------------------+
     """)
 
     ensure_pyinstaller()
@@ -130,12 +134,12 @@ def build():
         if os.path.exists(output_path):
             size_mb = os.path.getsize(output_path) / (1024 * 1024)
             print(f"""
-╔═══════════════════════════════════════════════════════╗
-║  빌드 성공!                                            ║
-╠═══════════════════════════════════════════════════════╣
-║  파일: dist/{output_name:<40} ║
-║  크기: {size_mb:.1f} MB{' ' * (40 - len(f'{size_mb:.1f} MB'))} ║
-╚═══════════════════════════════════════════════════════╝
++-------------------------------------------------------+
+|  Build SUCCESS!                                       |
++-------------------------------------------------------+
+|  File: dist/{output_name:<40} |
+|  Size: {size_mb:.1f} MB{' ' * (40 - len(f'{size_mb:.1f} MB'))} |
++-------------------------------------------------------+
             """)
         else:
             print(f"[빌드] 성공했으나 파일을 찾을 수 없음: {output_path}")
