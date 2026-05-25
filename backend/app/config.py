@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     # PortOne (결제)
     PORTONE_API_SECRET: str = os.getenv("PORTONE_API_SECRET", "")
 
+    # GitHub (에이전트 릴리즈)
+    GITHUB_REPO: str = ""
+
     # CORS - 문자열로 받고 파싱
     CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001"
 

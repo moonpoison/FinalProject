@@ -15,6 +15,7 @@ from datetime import datetime
 from app.models.user import User
 from app.utils.security import get_current_user
 from app.services.code_generator import code_generator
+from app.config import settings
 
 AGENT_VERSION = "1.0.0"
 # backend/ 의 부모가 프로젝트 루트
@@ -228,7 +229,7 @@ async def mark_running(command_id: str, is_running: bool = True):
 
 # ── 에이전트 배포 관련 ────────────────────────────────────────────
 
-GITHUB_REPO = os.environ.get("GITHUB_REPO", "")  # 예: "username/RPA-main"
+GITHUB_REPO = getattr(settings, "GITHUB_REPO", "") or ""  # 예: "moonpoison/AutoFlow"
 
 AGENT_FILENAMES = {
     "mac": "AutoFlowAgent-mac",
