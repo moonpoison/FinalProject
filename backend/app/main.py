@@ -54,10 +54,37 @@ async def health_check():
 
 
 async def seed_initial_data():
-    """Initialize database - no demo data."""
-    # No demo/dummy data is seeded
-    # Users create their own accounts and marketplace items
-    pass
+    """Create demo accounts if they don't exist."""
+    from sqlalchemy import select
+    from app.database import AsyncSessionLocal as async_session
+    from app.models.user import User, UserRole
+    from app.utils.security import get_password_hash
+
+    async with async_session() as session:
+        # Check if demo accounts already exist
+        result = await session.execute(select(User).where(User.email == "seller@demo.com"))
+        if result.scalar_one_or_none() is None:
+            seller = User(
+                email="seller@demo.com",
+                name="판매자",
+                hashed_password=get_password_hash("demo1234"),
+                role=UserRole.SELLER,
+            )
+            buyer = User(
+                email="buyer@demo.com",
+                name="구매자",
+                hashed_password=get_password_hash("demo1234"),
+                role=UserRole.BUYER,
+            )
+            session.add_all([seller, buyer])
+            await session.commit()
+        else:
+            # Fix role if seller account has wrong role
+            result = await session.execute(select(User).where(User.email == "seller@demo.com"))
+            seller = result.scalar_one_or_none()
+            if seller and seller.role != UserRole.SELLER:
+                seller.role = UserRole.SELLER
+                await session.commit()
 
 
 if __name__ == "__main__":

@@ -16,6 +16,7 @@ from app.models.user import User
 from app.utils.security import get_current_user
 from app.services.code_generator import code_generator
 from app.config import settings
+from app.database import get_db
 
 AGENT_VERSION = "1.0.0"
 # backend/ 의 부모가 프로젝트 루트
@@ -74,14 +75,37 @@ async def generate_code(
 async def download_code(
     workflow_id: str,
     current_user: User = Depends(get_current_user),
+    db: Any = Depends(get_db),
 ):
-    """생성된 코드 다운로드 (추후 워크스페이스 연동)"""
-    # TODO: 워크스페이스에서 블록 가져오기
+    """워크스페이스의 블록을 Python 코드로 변환하여 다운로드"""
+    from sqlalchemy import select
+    from app.models.workspace import Workspace
+
+    result = await db.execute(
+        select(Workspace).where(
+            Workspace.id == workflow_id,
+            Workspace.owner_id == current_user.id
+        )
+    )
+    workspace = result.scalar_one_or_none()
+    if not workspace:
+        raise HTTPException(status_code=404, detail="워크스페이스를 찾을 수 없습니다.")
+
+    blocks = workspace.blocks_data or []
+    if not blocks:
+        code = f"# {workspace.name}\n# 블록이 비어 있습니다.\n"
+    else:
+        code = code_generator.generate(
+            blocks=blocks,
+            workflow_name=workspace.name,
+        )
+
+    safe_name = workspace.name.replace(" ", "_")
     return PlainTextResponse(
-        content="# 워크스페이스 ID로 코드 생성 예정",
+        content=code,
         media_type="text/x-python",
         headers={
-            "Content-Disposition": f"attachment; filename={workflow_id}.py"
+            "Content-Disposition": f"attachment; filename={safe_name}.py"
         }
     )
 

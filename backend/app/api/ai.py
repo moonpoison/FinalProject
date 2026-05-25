@@ -1704,7 +1704,7 @@ text 타입 질문에는 반드시 예시를 default에 포함하세요.
                     "color": "#eab308",
                     "steps": [
                         {"id": "s4", "label": "대기", "description": "요소 로드 대기", "block_type": "wait", "color": "#f97316", "field_values": {"seconds": "2"}},
-                        {"id": "s5", "label": "Python 코드", "description": "커스텀 로직 실행", "block_type": "custom-code", "color": "#6366f1", "field_values": {"code": f"# {request.prompt}\n# TODO: 여기에 자동화 코드 작성\nprint('작업 시작')", "description": request.prompt[:50]}},
+                        {"id": "s5", "label": "Python 코드", "description": "커스텀 로직 실행", "block_type": "custom-code", "color": "#6366f1", "field_values": {"code": f"# {request.prompt}\nfrom selenium import webdriver\nfrom selenium.webdriver.common.by import By\nimport time\n\ndriver = webdriver.Chrome()\ntry:\n    # 여기에 자동화 로직을 작성하세요\n    driver.get('https://example.com')\n    time.sleep(2)\n    print('작업 완료')\nfinally:\n    driver.quit()", "description": request.prompt[:50]}},
                         {"id": "s6", "label": "로그", "description": "작업 완료 로그", "block_type": "log", "color": "#f97316", "field_values": {"message": "작업을 완료했습니다", "level": "success"}}
                     ]
                 })

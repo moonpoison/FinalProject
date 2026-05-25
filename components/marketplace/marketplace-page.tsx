@@ -78,8 +78,23 @@ export function MarketplacePage({ onPurchase, onCardClick, onSell }: Marketplace
   }, [fetchItems])
 
   const filtered = useMemo(() => {
-    return items
-  }, [items])
+    const sorted = [...items]
+    switch (sort) {
+      case "인기순":
+        sorted.sort((a, b) => (b.downloads ?? 0) - (a.downloads ?? 0))
+        break
+      case "최신순":
+        // API에서 이미 최신순으로 정렬되어 오므로 순서 유지
+        break
+      case "평점순":
+        sorted.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
+        break
+      case "무료":
+        sorted.sort((a, b) => a.price - b.price)
+        break
+    }
+    return sorted
+  }, [items, sort])
 
   const featured = useMemo(() => items.filter((i) => i.featured), [items])
 

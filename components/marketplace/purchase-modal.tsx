@@ -52,6 +52,9 @@ export function PurchaseModal({ item, onClose, onComplete }: PurchaseModalProps)
       }
 
       // PortOne SDK 동적 로드
+      if (!PORTONE_STORE_ID) {
+        throw new Error("결제 시스템이 설정되지 않았습니다. 관리자에게 문의하세요.")
+      }
       const PortOne = await import("@portone/browser-sdk/v2")
 
       // 결제 요청 파라미터

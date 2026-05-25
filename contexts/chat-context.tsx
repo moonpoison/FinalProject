@@ -78,6 +78,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (user) {
       refreshConversations()
+      // Poll for new messages every 15 seconds
+      const interval = setInterval(refreshConversations, 15000)
+      return () => clearInterval(interval)
     } else {
       setConversations([])
     }
@@ -176,8 +179,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         })
         return newConv
       } catch {
-        const sellerId = `seller-${safeName.toLowerCase().replace(/\s+/g, "-")}`
-        return getOrCreate(myId, myName, sellerId, safeName, topic)
+        // API 실패 시 로컬에서 임시 대화 생성 (고유 ID 사용)
+        const tempId = `temp-${Date.now()}`
+        return getOrCreate(myId, myName, tempId, safeName, topic)
       }
     },
     [getOrCreate]
