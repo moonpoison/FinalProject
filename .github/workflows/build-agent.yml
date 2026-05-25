@@ -51,7 +51,7 @@ jobs:
         id: version
         shell: bash
         run: |
-          VERSION=$(python -c "import re; print(re.search(r'VERSION = \"(.+?)\"', open('agent/build_agent.py').read()).group(1))")
+          VERSION=$(python -c "import re; print(re.search(r'VERSION = \"(.+?)\"', open('agent/build_agent.py', encoding='utf-8').read()).group(1))")
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Rename artifact
