@@ -80,7 +80,7 @@ function localBlocksToApi(blocks: WorkspaceBlock[]): any[] {
 }
 
 export interface MultiWorkspaceHandle {
-  addWorkspaceFromPurchase: (name: string, blocks?: WorkspaceBlock[], prompt?: string) => void
+  addWorkspaceFromPurchase: (name: string, blocks?: WorkspaceBlock[], prompt?: string, itemId?: string) => void
 }
 
 interface MultiWorkspaceProps {
@@ -222,12 +222,15 @@ export function MultiWorkspace({ isConnected, onConnect, initialBlocks, initialP
     }
   }
 
-  const addWorkspaceFromPurchase = useCallback(async (name: string, blocks: WorkspaceBlock[] = [], prompt?: string) => {
+  const addWorkspaceFromPurchase = useCallback(async (name: string, blocks: WorkspaceBlock[] = [], prompt?: string, itemId?: string) => {
     try {
-      const newWs = await api.createWorkspace({ name, blocks_data: localBlocksToApi(blocks) })
+      // 구매 항목에서 추가하는 경우 백엔드에서 블록 데이터를 가져옴
+      const newWs = itemId
+        ? await api.createWorkspaceFromPurchase(itemId, name)
+        : await api.createWorkspace({ name, blocks_data: localBlocksToApi(blocks) })
       const local = apiWorkspaceToLocal(newWs)
-      local.blocks = blocks
-      local.prompt = prompt  // AI 생성 시 원본 프롬프트 저장
+      if (!itemId) local.blocks = blocks
+      local.prompt = prompt
       setWorkspaces((prev) => {
         const next = [...prev, local]
         onWorkspacesChange?.(next)
@@ -418,7 +421,7 @@ export function MultiWorkspace({ isConnected, onConnect, initialBlocks, initialP
                   value={editingName}
                   onChange={(e) => setEditingName(e.target.value)}
                   onBlur={commitEditTab}
-                  onKeyDown={(e) => { if (e.key === "Enter") commitEditTab() }}
+                  onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) commitEditTab() }}
                   className="w-24 bg-transparent border-none outline-none text-sm font-medium"
                   onClick={(e) => e.stopPropagation()}
                 />

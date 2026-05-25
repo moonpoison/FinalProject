@@ -201,7 +201,7 @@ function MessageView({
           placeholder="메시지 입력..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSend())}
+          onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing && (e.preventDefault(), handleSend())}
           className="rounded-2xl h-10 text-sm flex-1"
         />
         <Button

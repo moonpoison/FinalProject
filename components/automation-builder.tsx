@@ -513,7 +513,7 @@ export function AutomationBuilder() {
           <div className="flex-1 overflow-hidden">
             <MyPage
               onAddToWorkspace={(purchase, sheetName) => {
-                multiWorkspaceHandleRef.current?.addWorkspaceFromPurchase(sheetName)
+                multiWorkspaceHandleRef.current?.addWorkspaceFromPurchase(sheetName, [], undefined, purchase.itemId)
                 setView("builder")
               }}
             />

@@ -52,7 +52,7 @@ function AddToWorkspaceModal({
             className="rounded-xl h-9 text-sm"
             placeholder="작업 이름 입력"
             autoFocus
-            onKeyDown={(e) => e.key === "Enter" && name.trim() && onConfirm(name.trim())}
+            onKeyDown={(e) => e.key === "Enter" && !e.nativeEvent.isComposing && name.trim() && onConfirm(name.trim())}
           />
         </div>
         <div className="flex gap-2 pt-1">
@@ -225,7 +225,7 @@ function EditTemplateModal({
                 <label className="text-xs font-semibold mb-1.5 block">태그 (최대 6개)</label>
                 <div className="flex gap-2">
                   <Input placeholder="태그 입력 후 Enter" value={tagInput} onChange={(e) => setTagInput(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
+                    onKeyDown={(e) => e.key === "Enter" && !e.nativeEvent.isComposing && (e.preventDefault(), addTag())}
                     className="rounded-xl h-9 text-sm flex-1" />
                   <Button size="sm" variant="outline" className="rounded-xl h-9 px-3" onClick={addTag}><Plus className="w-3.5 h-3.5" /></Button>
                 </div>
