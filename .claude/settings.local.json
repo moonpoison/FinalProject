@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(where:*)",
+      "Bash(pandoc:*)",
+      "Bash(cmd.exe:*)",
+      "Bash(powershell.exe -Command \"cd ''C:\\\\Users\\\\user\\\\Desktop\\\\RPA\\\\docs''; pandoc ''3.1_프로그램코드_산출물.md'' -o ''3.1_프로그램코드_산출물.docx''\")",
+      "Bash(powershell.exe -Command \"Get-ChildItem -Path ''C:\\\\Program Files'' -Filter ''pandoc.exe'' -Recurse -ErrorAction SilentlyContinue | Select-Object FullName; Get-ChildItem -Path ''C:\\\\Users\\\\user\\\\AppData\\\\Local'' -Filter ''pandoc.exe'' -Recurse -ErrorAction SilentlyContinue | Select-Object FullName\")",
+      "Bash(powershell.exe -Command \"where.exe pandoc\")",
+      "Bash(pip install:*)",
+      "Bash(python create_docx.py:*)",
+      "Bash(python -c:*)",
+      "Bash(npx tsc:*)",
+      "Bash(git add:*)",
+      "Bash(bash:*)",
+      "Bash(curl -s https://api.github.com/users/__TRACKED_VAR__)",
+      "Bash(gh repo:*)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\('scripts',{}\\)\\)\")",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(lsof -ti:8000)",
+      "Bash(xargs kill:*)",
+      "Bash(lsof -ti:3000)",
+      "Bash(echo \"Frontend PID: $!\")",
+      "Bash(npx next:*)",
+      "Bash(echo \"PID: $!\")",
+      "Bash(curl:*)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('로그인 성공' if 'access_token' in d else d\\)\")"
+    ]
+  }
+}

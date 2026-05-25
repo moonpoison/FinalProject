@@ -1,0 +1,191 @@
+================================================================================
+                              RPA BACKEND ERD
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                   USERS                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ PK │ id              │ VARCHAR    │ UUID                                    │
+│    │ email           │ VARCHAR    │ UNIQUE, NOT NULL, INDEX                 │
+│    │ hashed_password │ VARCHAR    │ NOT NULL                                │
+│    │ name            │ VARCHAR    │ NOT NULL                                │
+│    │ role            │ ENUM       │ buyer, seller (DEFAULT: buyer)          │
+│    │ avatar          │ VARCHAR    │ NULLABLE                                │
+│    │ joined_at       │ DATETIME   │ DEFAULT: now()                          │
+│    │ updated_at      │ DATETIME   │ DEFAULT: now(), ON UPDATE               │
+└─────────────────────────────────────────────────────────────────────────────┘
+       │
+       │ 1:N
+       ├──────────────────────────────────────────────────────────────────┐
+       │                                                                  │
+       ▼                                                                  ▼
+┌─────────────────────────────────────────┐    ┌─────────────────────────────────────────┐
+│              WORKSPACES                 │    │              TEMPLATES                  │
+├─────────────────────────────────────────┤    ├─────────────────────────────────────────┤
+│ PK │ id          │ VARCHAR │ UUID      │    │ PK │ id          │ VARCHAR │ UUID       │
+│ FK │ owner_id    │ VARCHAR │ → users   │    │ FK │ owner_id    │ VARCHAR │ → users    │
+│    │ name        │ VARCHAR(100)        │    │    │ name        │ VARCHAR(100)         │
+│    │ description │ VARCHAR(500)        │    │    │ description │ VARCHAR(500)         │
+│    │ blocks_data │ JSON    │ []        │    │    │ category    │ VARCHAR(50)          │
+│    │ order_index │ INTEGER │ 0         │    │    │ price       │ INTEGER  │ 0         │
+│    │ is_active   │ BOOLEAN │ TRUE      │    │    │ downloads   │ INTEGER  │ 0         │
+│    │ created_at  │ DATETIME            │    │    │ revenue     │ INTEGER  │ 0         │
+│    │ updated_at  │ DATETIME            │    │    │ rating      │ FLOAT    │ 0.0       │
+└─────────────────────────────────────────┘    │    │ reviews_count│ INTEGER │ 0        │
+                                               │    │ status      │ ENUM    │ active/draft/suspended │
+       │                                       │    │ blocks_data │ JSON    │ []        │
+       │ 1:N                                   │    │ tags        │ JSON    │ []        │
+       │                                       │    │ created_at  │ DATETIME            │
+       ▼                                       │    │ updated_at  │ DATETIME            │
+┌─────────────────────────────────────────┐    └─────────────────────────────────────────┘
+│               VIDEOS                    │
+├─────────────────────────────────────────┤
+│ PK │ id               │ VARCHAR │ UUID │
+│ FK │ owner_id         │ VARCHAR │ → users │
+│    │ filename         │ VARCHAR(255)   │
+│    │ original_filename│ VARCHAR(255)   │
+│    │ file_path        │ VARCHAR(500)   │
+│    │ file_size        │ INTEGER        │
+│    │ duration         │ INTEGER (sec)  │
+│    │ status           │ VARCHAR(50)    │ uploading/processing/extracting_audio/
+│    │                  │                │ extracting_frames/transcribing/analyzing/
+│    │                  │                │ generating/completed/failed
+│    │ progress         │ INTEGER │ 0-100│
+│    │ error_message    │ TEXT           │
+│    │ audio_path       │ VARCHAR(500)   │
+│    │ transcript       │ TEXT           │
+│    │ frame_count      │ INTEGER │ 0    │
+│    │ frames_dir       │ VARCHAR(500)   │
+│    │ analysis_result  │ JSON           │
+│    │ generated_blocks │ JSON           │
+│    │ created_at       │ DATETIME       │
+│    │ updated_at       │ DATETIME       │
+│    │ completed_at     │ DATETIME       │
+└─────────────────────────────────────────┘
+
+       │
+       │ 1:N (users)
+       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                            MARKETPLACE_ITEMS                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ PK │ id             │ VARCHAR    │ UUID                                     │
+│ FK │ creator_id     │ VARCHAR    │ → users                                  │
+│    │ title          │ VARCHAR(100)│ NOT NULL                                │
+│    │ description    │ TEXT       │ NOT NULL                                 │
+│    │ category       │ VARCHAR(50)│ 웹자동화/데이터수집/SNS자동화/업무자동화/쇼핑몰│
+│    │ price          │ INTEGER    │ 0 (무료)                                 │
+│    │ rating         │ FLOAT      │ 0.0                                      │
+│    │ reviews_count  │ INTEGER    │ 0                                        │
+│    │ downloads      │ INTEGER    │ 0                                        │
+│    │ creator_name   │ VARCHAR    │ NOT NULL                                 │
+│    │ creator_avatar │ VARCHAR    │ NULLABLE                                 │
+│    │ tags           │ JSON       │ []                                       │
+│    │ block_colors   │ JSON       │ []                                       │
+│    │ blocks_data    │ JSON       │ []                                       │
+│    │ featured       │ BOOLEAN    │ FALSE                                    │
+│    │ verified       │ BOOLEAN    │ FALSE                                    │
+│    │ status         │ VARCHAR(20)│ active/draft/suspended                   │
+│    │ created_at     │ DATETIME   │                                          │
+│    │ updated_at     │ DATETIME   │                                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+       │
+       │ 1:N
+       ├──────────────────────────────────────────────────────────────────┐
+       │                                                                  │
+       ▼                                                                  ▼
+┌─────────────────────────────────────────┐    ┌─────────────────────────────────────────┐
+│              PURCHASES                  │    │               REVIEWS                   │
+├─────────────────────────────────────────┤    ├─────────────────────────────────────────┤
+│ PK │ id           │ VARCHAR │ UUID     │    │ PK │ id          │ VARCHAR │ UUID       │
+│ FK │ buyer_id     │ VARCHAR │ → users  │    │ FK │ user_id     │ VARCHAR │ → users    │
+│ FK │ item_id      │ VARCHAR │ → marketplace_items │ │ FK │ item_id │ VARCHAR │ → marketplace_items │
+│    │ item_name    │ VARCHAR │ NOT NULL │    │ FK │ purchase_id │ VARCHAR │ → purchases │
+│    │ item_creator │ VARCHAR │ NOT NULL │    │    │ rating      │ INTEGER │ 1-5        │
+│    │ price        │ INTEGER │ NOT NULL │    │    │ text        │ TEXT    │ NOT NULL   │
+│    │ status       │ ENUM    │ pending/active/cancelled │ │  │ created_at │ DATETIME │  │
+│    │ deadline     │ DATETIME│ +3 days  │    │    │ updated_at  │ DATETIME            │
+│    │ purchased_at │ DATETIME│          │    └─────────────────────────────────────────┘
+│    │ confirmed_at │ DATETIME│ NULLABLE │
+│    │ cancelled_at │ DATETIME│ NULLABLE │
+└─────────────────────────────────────────┘
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                            CONVERSATIONS                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ PK │ id               │ VARCHAR    │ UUID                                   │
+│ FK │ participant1_id  │ VARCHAR    │ → users                                │
+│    │ participant1_name│ VARCHAR    │ NOT NULL                               │
+│ FK │ participant2_id  │ VARCHAR    │ → users                                │
+│    │ participant2_name│ VARCHAR    │ NOT NULL                               │
+│    │ topic            │ VARCHAR    │ NULLABLE                               │
+│    │ created_at       │ DATETIME   │                                        │
+│    │ updated_at       │ DATETIME   │                                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+       │
+       │ 1:N
+       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              MESSAGES                                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ PK │ id              │ VARCHAR    │ UUID                                    │
+│ FK │ conversation_id │ VARCHAR    │ → conversations                         │
+│ FK │ sender_id       │ VARCHAR    │ → users                                 │
+│    │ sender_name     │ VARCHAR    │ NOT NULL                                │
+│    │ body            │ TEXT       │ NOT NULL                                │
+│    │ read            │ BOOLEAN    │ FALSE                                   │
+│    │ created_at      │ DATETIME   │                                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+                              RELATIONSHIPS SUMMARY
+================================================================================
+
+users (1) ──────────────< (N) workspaces        (owner)
+users (1) ──────────────< (N) templates         (owner)
+users (1) ──────────────< (N) videos            (owner)
+users (1) ──────────────< (N) marketplace_items (creator)
+users (1) ──────────────< (N) purchases         (buyer)
+users (1) ──────────────< (N) reviews           (user)
+users (N) ──────────────< (N) conversations     (participant1, participant2)
+users (1) ──────────────< (N) messages          (sender)
+
+marketplace_items (1) ──< (N) purchases
+marketplace_items (1) ──< (N) reviews
+
+conversations (1) ──────< (N) messages
+
+purchases (1) ──────────< (N) reviews           (purchase_id)
+
+================================================================================
+                                  ENUMS
+================================================================================
+
+UserRole:
+  - buyer
+  - seller
+
+TemplateStatus:
+  - active
+  - draft
+  - suspended
+
+PurchaseStatus:
+  - pending
+  - active
+  - cancelled
+
+VideoStatus:
+  - uploading
+  - processing
+  - extracting_audio
+  - extracting_frames
+  - transcribing
+  - analyzing
+  - generating
+  - completed
+  - failed
+
+================================================================================

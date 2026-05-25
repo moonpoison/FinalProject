@@ -1,0 +1,111 @@
+name: Build Agent
+
+on:
+  push:
+    tags:
+      - 'agent-v*'  # agent-v1.0.0 같은 태그 push 시 실행
+  workflow_dispatch:    # 수동 실행도 가능
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            platform: mac
+            artifact: AutoFlowAgent-mac
+          - os: windows-latest
+            platform: windows
+            artifact: AutoFlowAgent-windows.exe
+          - os: ubuntu-latest
+            platform: linux
+            artifact: AutoFlowAgent-linux
+
+    runs-on: ${{ matrix.os }}
+    name: Build (${{ matrix.platform }})
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      # Linux에서 tkinter 설치
+      - name: Install tkinter (Linux)
+        if: matrix.platform == 'linux'
+        run: sudo apt-get update && sudo apt-get install -y python3-tk
+
+      - name: Install dependencies
+        run: |
+          pip install pyinstaller requests websocket-client
+          pip install selenium webdriver-manager pandas openpyxl
+
+      - name: Build agent
+        working-directory: agent
+        run: python build_agent.py
+
+      - name: Get version
+        id: version
+        shell: bash
+        run: |
+          VERSION=$(python -c "import re; print(re.search(r'VERSION = \"(.+?)\"', open('agent/build_agent.py').read()).group(1))")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Rename artifact
+        shell: bash
+        working-directory: agent/dist
+        run: |
+          if [ "${{ matrix.platform }}" = "windows" ]; then
+            mv AutoFlowAgent-v${{ steps.version.outputs.version }}-windows.exe ${{ matrix.artifact }}
+          else
+            mv AutoFlowAgent-v${{ steps.version.outputs.version }}-${{ matrix.platform }} ${{ matrix.artifact }}
+            chmod +x ${{ matrix.artifact }}
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: agent/dist/${{ matrix.artifact }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "AutoFlow Agent ${{ github.ref_name }}"
+          body: |
+            ## AutoFlow 로컬 에이전트
+
+            더블클릭으로 실행 가능한 데스크톱 앱입니다.
+            Python 설치 없이 바로 사용할 수 있습니다.
+
+            ### 다운로드
+            - **macOS**: `AutoFlowAgent-mac`
+            - **Windows**: `AutoFlowAgent-windows.exe`
+            - **Linux**: `AutoFlowAgent-linux`
+
+            ### 사용법
+            1. 파일 다운로드 후 실행
+            2. 서버 URL 입력
+            3. 토큰 또는 이메일/비밀번호로 연결
+
+            > macOS에서 "확인되지 않은 개발자" 경고 시:
+            > `xattr -d com.apple.quarantine ./AutoFlowAgent-mac`
+          files: |
+            artifacts/AutoFlowAgent-mac/AutoFlowAgent-mac
+            artifacts/AutoFlowAgent-windows.exe/AutoFlowAgent-windows.exe
+            artifacts/AutoFlowAgent-linux/AutoFlowAgent-linux
